@@ -22,16 +22,17 @@ func (repo *ProjectRepository) Create(ctx context.Context, p *entities.Project) 
 
 	var projectID string
 	query := `
-		INSERT INTO projects (name, unique_key, source_location, status, created_at)
-		VALUES ($1, $2, $3, $4, $5)
+		INSERT INTO projects (user_id, name, unique_key, source, status, created_at)
+		VALUES ($1, $2, $3, $4, $5, $6)
 		RETURNING id
 	`
+	
 
 	err := infrastructure.Retry(ctx, 3, func() error {
 		return repo.DB.QueryRow(
 			ctx,
 			query,
-			// p.UserID,
+			p.UserID,
 			p.Name,
 			p.UniqueKey,
 			p.SourceLocation,
@@ -47,3 +48,5 @@ func (repo *ProjectRepository) Create(ctx context.Context, p *entities.Project) 
 	}
 	return projectID, nil
 }
+
+

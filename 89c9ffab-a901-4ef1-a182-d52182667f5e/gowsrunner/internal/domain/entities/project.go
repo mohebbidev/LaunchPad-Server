@@ -19,7 +19,7 @@ var (
 
 type Project struct {
 	ID            int64          // Database ID (BIGSERIAL)
-	// UserID        string          // Foreign key to users table
+	UserID        string          // Foreign key to users table
 	Name          string         // User-given name for the project
 	UniqueKey     string         // Short, unique identifier for URLs (e.g., "a1b2c3d4")
 	SourceType    string         // e.g., "zip", "git_repo"
@@ -42,9 +42,9 @@ type ProjectWithSetting struct {
 // Simple Validation 
 
 func (p *Project) Validate() error {
-	// if p.UserID <= "" {
-	// 	return errors.New("project must belong to a valid user")
-	// }
+	if p.UserID <= "" {
+		return errors.New("project must belong to a valid user")
+	}
 	if p.Name == "" {
 		return errors.New("project name cannot be empty")
 	}

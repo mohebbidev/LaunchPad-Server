@@ -1,0 +1,53 @@
+# ===== Go specific =====
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.out
+
+# Build artifacts
+/bin/
+/dist/
+/build/
+
+# Test binary
+*.test
+
+# Go workspace
+*.swp
+*.swo
+*.swn
+go.work
+go.work.sum
+
+# IDE & Editor
+.idea/
+.vscode/
+*.iml
+*.sublime-*
+
+# ===== OS files =====
+.DS_Store
+Thumbs.db
+*.log
+
+# ===== Dependencies =====
+# Uncomment if you want to commit vendor:
+# vendor/
+
+# ===== Environment & Config =====
+.env
+.env.local
+.env.*.local
+
+# ===== Excluded file types =====
+# Zip files
+*.zip
+
+# Markdown files
+*.md
+*.mdx
+
+configuration.json

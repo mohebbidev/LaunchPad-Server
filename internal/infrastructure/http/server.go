@@ -17,7 +17,7 @@ func InitializeUploadHandler(db *pgxpool.Pool) *handler.UploadHandler {
 
     // Define your paths
     uploadDir := "./uploads"
-    workDir := "./projects"
+    workDir := "./work"
 
 	useCase := application.NewUploadProjectUseCase(
         dbRepo, 

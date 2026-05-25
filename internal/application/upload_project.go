@@ -31,7 +31,7 @@ func NewUploadProjectUseCase(
 	projectRepo repository.ProjectRepository,
 	storageRepo repository.Storage,
 	uploadDir string, // Added
-	workDir string,   // Added
+	workDir string, // Added
 ) *UploadProjectUseCase {
 
 	return &UploadProjectUseCase{
@@ -64,11 +64,11 @@ func (uc *UploadProjectUseCase) Execute(
 		extractPath,
 	)
 
-projID, err := uc.ProjectRepo.Create(ctx, project)
+	projID, err := uc.ProjectRepo.Create(ctx, project)
 
-if err != nil {
-	return nil, err
-}
+	if err != nil {
+		return nil, err
+	}
 
 	return &UploadOutput{
 		ProjectID: projID,

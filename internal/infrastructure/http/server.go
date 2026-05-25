@@ -14,10 +14,20 @@ import (
 func InitializeUploadHandler(db *pgxpool.Pool) *handler.UploadHandler {
 	dbRepo := postgres.NewProjectRepository(db)
 	storageRepo := storage.Storage{}
-	useCase := application.NewUploadProjectUseCase(dbRepo,&storageRepo)
+
+    // Define your paths
+    uploadDir := "./uploads"
+    workDir := "./projects"
+
+	useCase := application.NewUploadProjectUseCase(
+        dbRepo, 
+        &storageRepo, 
+        uploadDir, 
+        workDir,
+    )
+    
 	return handler.NewUplaodHandler(useCase)
 }
-
 
 func InitializeRoutes(ctx context.Context, db *pgxpool.Pool, mux *http.ServeMux) {
 	

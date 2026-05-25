@@ -20,20 +20,42 @@ var ErrorsInstance Errors = Errors{
 }
 
 
+// func MapPostgresError(err error) error {
+// 	var pgError *pgconn.PgError
+
+// 	if errors.As(err, &pgError) {
+// 		switch pgError.Code {
+// 		case "23505":
+// 			if pgError.ConstraintName == "users_email_unique" {
+// 				return ErrorsInstance.UserAlreadyExists
+// 			}
+// 			return fmt.Errorf("Unique COntraint Violation %w", err)
+// 		case "40001", "40P01":
+// 			return err
+// 		}
+
+// 	}
+// 	return fmt.Errorf("db error: %w", err)
+// }
 func MapPostgresError(err error) error {
-	var pgError *pgconn.PgError
+    // 1. Guard clause: if there is no error, just return nil
+    if err == nil {
+        return nil
+    }
 
-	if errors.As(err, &pgError) {
-		switch pgError.Code {
-		case "23505":
-			if pgError.ConstraintName == "users_email_unique" {
-				return ErrorsInstance.UserAlreadyExists
-			}
-			return fmt.Errorf("Unique COntraint Violation %w", err)
-		case "40001", "40P01":
-			return err
-		}
+    var pgError *pgconn.PgError
+    if errors.As(err, &pgError) {
+        switch pgError.Code {
+        case "23505":
+            if pgError.ConstraintName == "users_email_unique" {
+                return ErrorsInstance.UserAlreadyExists
+            }
+            return fmt.Errorf("Unique Constraint Violation: %w", err)
+        case "40001", "40P01":
+            return err
+        }
+    }
 
-	}
-	return fmt.Errorf("db error: %w", err)
+    // 2. Now it is safe to wrap, because we know err != nil
+    return fmt.Errorf("db error: %w", err)
 }

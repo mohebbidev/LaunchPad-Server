@@ -47,3 +47,38 @@ func (repo *ProjectRepository) Create(ctx context.Context, p *entities.Project) 
 	}
 	return projectID, nil
 }
+
+
+func (repo *ProjectRepository) GetByID(ctx context.Context, id string) (*entities.Project, error) {
+	query := `
+		SELECT id, name, unique_key, source_type, source_location, status, port, created_at, updated_at
+		FROM projects
+		WHERE id = $1
+	`
+	p := &entities.Project{}
+	err := repo.DB.QueryRow(ctx, query, id).Scan(
+		&p.ID, &p.Name, &p.UniqueKey, &p.SourceType,
+		&p.SourceLocation, &p.Status, &p.Port,
+		&p.CreatedAt, &p.UpdatedAt,
+	)
+	if err != nil {
+		return nil, entities.MapPostgresError(err)
+	}
+	return p, nil
+}
+
+func (repo *ProjectRepository) UpdateStatus(ctx context.Context, id string, status entities.ProjectStatus) error {
+	_, err := repo.DB.Exec(ctx,
+		`UPDATE projects SET status=$1, updated_at=NOW() WHERE id=$2`,
+		status, id,
+	)
+	return err
+}
+
+func (repo *ProjectRepository) UpdatePortAndStatus(ctx context.Context, id string, port int, status entities.ProjectStatus) error {
+	_, err := repo.DB.Exec(ctx,
+		`UPDATE projects SET port=$1, status=$2, updated_at=NOW() WHERE id=$3`,
+		port, status, id,
+	)
+	return err
+}

@@ -1,15 +1,15 @@
 package repository
 
-import (
-	"context"
-	entity "gowsrunner/internal/domain/entities"
-)
+// import (
+// 	"context"
+// 	entity "gowsrunner/internal/domain/entities"
+// )
 
 // ProjectRepository defines the interface for interacting with project data storage.
 // It abstracts away the database implementation details.
-type ProjectRepository interface {
-	// Create saves a new project to the repository.
-	Create(ctx context.Context, p *entity.Project) (string, error)
+// type ProjectRepository interface {
+// 	// Create saves a new project to the repository.
+// 	Create(ctx context.Context, p *entity.Project) (string, error)
 
 	// GetByID retrieves a project by its database ID.
 	// GetByID(ctx context.Context, id int64) (*entity.Project, error)
@@ -40,6 +40,20 @@ type ProjectRepository interface {
 
 	// Delete removes a project and its associated settings.
 	// Delete(ctx context.Context, projectID int64) error
+// }
+
+
+
+import (
+	"context"
+	"gowsrunner/internal/domain/entities"
+)
+
+type ProjectRepository interface {
+	Create(ctx context.Context, p *entities.Project) (string, error)
+	GetByID(ctx context.Context, id string) (*entities.Project, error)
+	UpdateStatus(ctx context.Context, id string, status entities.ProjectStatus) error
+	UpdatePortAndStatus(ctx context.Context, id string, port int, status entities.ProjectStatus) error
 }
 
 // User represents a user in the domain (minimal for now).

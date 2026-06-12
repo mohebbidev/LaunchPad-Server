@@ -48,17 +48,16 @@ func (repo *ProjectRepository) Create(ctx context.Context, p *entities.Project) 
 	return projectID, nil
 }
 
-
 func (repo *ProjectRepository) GetByID(ctx context.Context, id string) (*entities.Project, error) {
 	query := `
-		SELECT id, name, unique_key, source_type, source_location, status, port, created_at, updated_at
+		SELECT id, name, unique_key, source_type, source_location, status, created_at, updated_at
 		FROM projects
 		WHERE id = $1
 	`
 	p := &entities.Project{}
 	err := repo.DB.QueryRow(ctx, query, id).Scan(
 		&p.ID, &p.Name, &p.UniqueKey, &p.SourceType,
-		&p.SourceLocation, &p.Status, &p.Port,
+		&p.SourceLocation, &p.Status,
 		&p.CreatedAt, &p.UpdatedAt,
 	)
 	if err != nil {

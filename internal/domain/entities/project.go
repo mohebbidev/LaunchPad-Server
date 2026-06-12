@@ -5,7 +5,6 @@ import (
 	"time"
 )
 
-
 type ProjectStatus string
 
 var (
@@ -16,30 +15,29 @@ var (
 	StatusStopped  ProjectStatus = "stopped"
 )
 
-
 type Project struct {
-	ID            int64          // Database ID (BIGSERIAL)
+	// ID            int64          // Database ID (BIGSERIAL)
+	ID string
 	// UserID        string          // Foreign key to users table
-	Name          string         // User-given name for the project
-	UniqueKey     string         // Short, unique identifier for URLs (e.g., "a1b2c3d4")
-	SourceType    string         // e.g., "zip", "git_repo"
+	Name           string        // User-given name for the project
+	UniqueKey      string        // Short, unique identifier for URLs (e.g., "a1b2c3d4")
+	SourceType     string        // e.g., "zip", "git_repo"
 	SourceLocation string        // Path on disk, URL, etc.
-	Status        ProjectStatus  // Current status of the project
-	Port          int            // Port the project is running on
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
-	DeployedAt    *time.Time
+	Status         ProjectStatus // Current status of the project
+	Port           int           // Port the project is running on
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
+	DeployedAt     *time.Time
 }
-
 
 type Settings map[string]any
 
 type ProjectWithSetting struct {
-	Project *Project
+	Project  *Project
 	Settings Settings
 }
 
-// Simple Validation 
+// Simple Validation
 
 func (p *Project) Validate() error {
 	// if p.UserID <= "" {
@@ -77,7 +75,7 @@ func NewProject(name, uniqueKey, sourceType, sourceLocation string) *Project {
 		SourceType:     sourceType,
 		SourceLocation: sourceLocation,
 		Status:         StatusPending, // Default status
-		Port:           0,           // Default port
+		Port:           0,             // Default port
 		CreatedAt:      now,
 		UpdatedAt:      now,
 		DeployedAt:     nil,

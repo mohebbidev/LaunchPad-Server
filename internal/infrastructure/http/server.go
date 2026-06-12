@@ -28,7 +28,7 @@ func InitializeRunProjectHandler(db *pgxpool.Pool) *handler.RunHandler {
 
 
 func InitializeRoutes(ctx context.Context, db *pgxpool.Pool, mux *http.ServeMux) {
-	uploadHandler := InitializeUploadHandler(db)
+	uploadHandler := InitializeUploadHandler(db) 
 	runHandler := InitializeRunProjectHandler(db)
 
 	mux.Handle("/upload", withCORS(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

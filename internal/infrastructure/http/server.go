@@ -6,6 +6,7 @@ import (
 	"gowsrunner/internal/infrastructure/database/postgres"
 	handler "gowsrunner/internal/infrastructure/http/handlers"
 	"gowsrunner/internal/infrastructure/storage"
+	"gowsrunner/internal/queue"
 	"net/http"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -20,16 +21,16 @@ func InitializeUploadHandler(db *pgxpool.Pool) *handler.UploadHandler {
 	return handler.NewUplaodHandler(useCase)
 }
 
-func InitializeRunProjectHandler(db *pgxpool.Pool) *handler.RunHandler {
+func InitializeRunProjectHandler(db *pgxpool.Pool, wp *queue.WorkerPool) *handler.RunHandler {
 	dbRepo := postgres.NewProjectRepository(db)           // same repo, fresh instance
 	useCase := application.NewRunProjectUseCase(dbRepo)
 	return handler.NewRunHandler(useCase)
 }
 
 
-func InitializeRoutes(ctx context.Context, db *pgxpool.Pool, mux *http.ServeMux) {
+func InitializeRoutes(ctx context.Context, db *pgxpool.Pool, wp *queue.WorkerPool, mux *http.ServeMux) {
 	uploadHandler := InitializeUploadHandler(db) 
-	runHandler := InitializeRunProjectHandler(db)
+	runHandler := InitializeRunProjectHandler(db, wp)
 
 	mux.Handle("/upload", withCORS(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		uploadHandler.ServeHTTP(ctx, w, r)

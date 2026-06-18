@@ -55,7 +55,7 @@ func (wp *WorkerPool) Worker(id int) {
 
 	for {
 		select {
-		case <-wp.wg.Done():
+		case <-wp.ctx.Done():
 			log.Printf("WORKER CANCELLEd هی: %v", id)
 			return
 

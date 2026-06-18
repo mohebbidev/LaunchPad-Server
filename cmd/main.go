@@ -2,14 +2,19 @@ package main
 
 import (
 	"context"
+	"gowsrunner/internal/application"
 	"gowsrunner/internal/infrastructure/config"
 	"gowsrunner/internal/infrastructure/database/postgres"
 	packageHttp "gowsrunner/internal/infrastructure/http"
+	"gowsrunner/internal/queue"
 	"log"
 	nethttp "net/http"
 	"os"
 	"os/exec"
 	"sync"
+
+	"github.com/docker/docker/builder/builder-next/worker"
+	"github.com/docker/docker/libcontainerd/queue"
 )
 
 var (
@@ -56,6 +61,8 @@ func main() {
 
 	packageHttp.InitializeRoutes(ctx, dbPool, mux)
 
+	projRunner := application.NewProjectRunner()
+	workerPool := queue.NewWorkerPool(15, projRunner.Run, )
 	server := &nethttp.Server{
 		Addr: ":" + configuration.Server.Port,
 		Handler: mux,

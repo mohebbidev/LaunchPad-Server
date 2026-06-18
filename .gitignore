@@ -51,6 +51,6 @@ Thumbs.db
 *.mdx
 
 configuration.json
-
+/uploads/
 /work/
 /temp/

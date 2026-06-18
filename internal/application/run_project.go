@@ -8,6 +8,7 @@ import (
 
 	"gowsrunner/internal/domain/entities"
 	"gowsrunner/internal/domain/repository"
+	"gowsrunner/internal/queue"
 	"os"
 	"path/filepath"
 	"sync/atomic"
@@ -33,9 +34,10 @@ type LogLine struct {
 type RunProjectUseCase struct {
 	ProjectRepo repository.ProjectRepository
 	Runner      *ProjectRunner
+	WP          *queue.WorkerPool
 }
 
-func NewRunProjectUseCase(repo repository.ProjectRepository) *RunProjectUseCase {
+func NewRunProjectUseCase(repo repository.ProjectRepository, wp *queue.WorkerPool) *RunProjectUseCase {
 	return &RunProjectUseCase{ProjectRepo: repo, Runner: NewProjectRunner()}
 }
 
@@ -99,6 +101,35 @@ func (uc *RunProjectUseCase) Execute(
 	}()
 
 	return logCh, nil
+}
+
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
+}
+
+func splitLines(s string) []string {
+	var lines []string
+	sc := bufio.NewScanner(bytes.NewBufferString(s))
+	for sc.Scan() {
+		lines = append(lines, sc.Text())
+	}
+	return lines
+}
+func resolveProjectRoot(extractPath string) (string, error) {
+	entries, err := os.ReadDir(extractPath)
+	if err != nil {
+		return "", err
+	}
+
+	// if there's exactly one entry and it's a directory,
+	// the zip was packed with a wrapper folder — step into it
+	if len(entries) == 1 && entries[0].IsDir() {
+		return filepath.Join(extractPath, entries[0].Name()), nil
+	}
+
+	// files are at the root of the extract — use as-is
+	return extractPath, nil
 }
 
 // Execute starts the project and streams log lines into the returned channel.
@@ -228,32 +259,3 @@ func (uc *RunProjectUseCase) Execute(
 
 // 	return logCh, nil
 // }
-
-func fileExists(path string) bool {
-	_, err := os.Stat(path)
-	return err == nil
-}
-
-func splitLines(s string) []string {
-	var lines []string
-	sc := bufio.NewScanner(bytes.NewBufferString(s))
-	for sc.Scan() {
-		lines = append(lines, sc.Text())
-	}
-	return lines
-}
-func resolveProjectRoot(extractPath string) (string, error) {
-	entries, err := os.ReadDir(extractPath)
-	if err != nil {
-		return "", err
-	}
-
-	// if there's exactly one entry and it's a directory,
-	// the zip was packed with a wrapper folder — step into it
-	if len(entries) == 1 && entries[0].IsDir() {
-		return filepath.Join(extractPath, entries[0].Name()), nil
-	}
-
-	// files are at the root of the extract — use as-is
-	return extractPath, nil
-}

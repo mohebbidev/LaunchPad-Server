@@ -6,9 +6,9 @@ import (
 	"context"
 	"fmt"
 
-	"gowsrunner/internal/domain/entities"
-	"gowsrunner/internal/domain/repository"
-	"gowsrunner/internal/queue"
+	"golaunch/internal/domain/entities"
+	"golaunch/internal/domain/repository"
+	"golaunch/internal/queue"
 	"os"
 	"path/filepath"
 	"sync/atomic"

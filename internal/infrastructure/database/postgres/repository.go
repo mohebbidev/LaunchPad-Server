@@ -5,7 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"gowsrunner/internal/infrastructure/config"
+	"golaunch/internal/infrastructure/config"
 	"time"
 
 	"log/slog"

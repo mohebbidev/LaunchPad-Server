@@ -2,9 +2,9 @@ package application
 
 import (
 	"context"
-	"gowsrunner/internal/domain/entities"
-	"gowsrunner/internal/domain/repository"
-	"gowsrunner/internal/infrastructure/utils"
+	"golaunch/internal/domain/entities"
+	"golaunch/internal/domain/repository"
+	"golaunch/internal/infrastructure/utils"
 	"io"
 	"path/filepath"
 )

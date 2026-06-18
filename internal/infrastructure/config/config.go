@@ -1,31 +1,27 @@
 package config
 
 import (
-	"gowsrunner/internal/infrastructure/utils"
 	"fmt"
-	
+	"golaunch/internal/infrastructure/utils"
 )
 
 type AppConfig struct {
 	Server ServerConfig
-	DB DBConfig 
+	DB     DBConfig
 }
 
 type ServerConfig struct {
 	Port string `json:"port"`
 }
 
-
 type DBConfig struct {
-	Host     string 
+	Host     string
 	Port     int    `json:"port"`
 	Name     string `json:"name"`
 	User     string `json:"user"`
 	Password string `json:"password"`
 	SSLMode  string `json:"ssl_mode"` // disable/require
 }
-
-
 
 func LoadConfig() (AppConfig, error) {
 	cfg, err := utils.OpenJSON[AppConfig]("cmd/configuration.json")
@@ -43,7 +39,7 @@ func LoadConfig() (AppConfig, error) {
 	if cfg.DB.Host == "" || cfg.DB.User == "" || cfg.DB.Password == "" {
 		return AppConfig{}, fmt.Errorf("Please Fill The Required Fields")
 	}
-	
+
 	// FUCKED UP REGEX PATTERN
 	// if !re.MatchString(cfg.DB.Host) {
 	// 	return AppConfig{}, fmt.Errorf("Invalid hostname format: %s", cfg.DB.Host)
@@ -51,4 +47,3 @@ func LoadConfig() (AppConfig, error) {
 
 	return cfg, nil
 }
-

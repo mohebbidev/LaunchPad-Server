@@ -2,8 +2,8 @@ package postgres
 
 import (
 	"context"
-	"gowsrunner/internal/domain/entities"
-	"gowsrunner/internal/infrastructure"
+	"golaunch/internal/domain/entities"
+	"golaunch/internal/infrastructure"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )

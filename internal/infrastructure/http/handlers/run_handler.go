@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 	"fmt"
-	"gowsrunner/internal/application"
+	"golaunch/internal/application"
 	"net/http"
 )
 

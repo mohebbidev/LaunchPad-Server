@@ -2,18 +2,17 @@ package main
 
 import (
 	"context"
-	"gowsrunner/internal/application"
-	"gowsrunner/internal/infrastructure/config"
-	"gowsrunner/internal/infrastructure/database/postgres"
-	packageHttp "gowsrunner/internal/infrastructure/http"
-	"gowsrunner/internal/queue"
+	"golaunch/internal/application"
+	"golaunch/internal/infrastructure/config"
+	"golaunch/internal/infrastructure/database/postgres"
+	packageHttp "golaunch/internal/infrastructure/http"
+	"golaunch/internal/queue"
 	"log"
 	nethttp "net/http"
 	"os"
 	"os/exec"
 	"sync"
 
-	"github.com/docker/docker/builder/builder-next/worker"
 	"github.com/docker/docker/libcontainerd/queue"
 )
 
@@ -21,9 +20,8 @@ var (
 	RunningMu sync.Mutex
 	Running   = map[string]*exec.Cmd{}
 	UploadDir = "./uploads"
-	WorkDir = "./work"
+	WorkDir   = "./work"
 )
-
 
 func main() {
 
@@ -48,7 +46,7 @@ func main() {
 		log.Fatalf("cant connect db %v", err.Error())
 	}
 
-	postgres.RunMigrations(ctx ,dbPool, "file:///home/nooberthanyall/Documents/projects/gowsrunner/migrations")
+	postgres.RunMigrations(ctx, dbPool, "file:///home/nooberthanyall/Documents/projects/golaunch/migrations")
 	defer func() {
 		if dbPool != nil {
 			log.Println("Closing database connection pool...")
@@ -56,15 +54,14 @@ func main() {
 		}
 	}()
 
-
 	mux := nethttp.NewServeMux()
 
 	packageHttp.InitializeRoutes(ctx, dbPool, mux)
 
 	projRunner := application.NewProjectRunner()
-	workerPool := queue.NewWorkerPool(15, projRunner.Run, )
+	workerPool := queue.NewWorkerPool(15, projRunner.Run)
 	server := &nethttp.Server{
-		Addr: ":" + configuration.Server.Port,
+		Addr:    ":" + configuration.Server.Port,
 		Handler: mux,
 
 		// Open for later Timeouts
@@ -74,4 +71,3 @@ func main() {
 		log.Fatalf("HTTP server failed: %v", err)
 	}
 }
-

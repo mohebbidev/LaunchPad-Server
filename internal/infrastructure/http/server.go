@@ -2,11 +2,11 @@ package http
 
 import (
 	"context"
-	"gowsrunner/internal/application"
-	"gowsrunner/internal/infrastructure/database/postgres"
-	handler "gowsrunner/internal/infrastructure/http/handlers"
-	"gowsrunner/internal/infrastructure/storage"
-	"gowsrunner/internal/queue"
+	"golaunch/internal/application"
+	"golaunch/internal/infrastructure/database/postgres"
+	handler "golaunch/internal/infrastructure/http/handlers"
+	"golaunch/internal/infrastructure/storage"
+	"golaunch/internal/queue"
 	"net/http"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -22,14 +22,13 @@ func InitializeUploadHandler(db *pgxpool.Pool) *handler.UploadHandler {
 }
 
 func InitializeRunProjectHandler(db *pgxpool.Pool, wp *queue.WorkerPool) *handler.RunHandler {
-	dbRepo := postgres.NewProjectRepository(db)           // same repo, fresh instance
+	dbRepo := postgres.NewProjectRepository(db) // same repo, fresh instance
 	useCase := application.NewRunProjectUseCase(dbRepo)
 	return handler.NewRunHandler(useCase)
 }
 
-
 func InitializeRoutes(ctx context.Context, db *pgxpool.Pool, wp *queue.WorkerPool, mux *http.ServeMux) {
-	uploadHandler := InitializeUploadHandler(db) 
+	uploadHandler := InitializeUploadHandler(db)
 	runHandler := InitializeRunProjectHandler(db, wp)
 
 	mux.Handle("/upload", withCORS(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -43,14 +42,14 @@ func InitializeRoutes(ctx context.Context, db *pgxpool.Pool, wp *queue.WorkerPoo
 }
 
 func withCORS(h http.Handler) http.Handler {
-    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        w.Header().Set("Access-Control-Allow-Origin", "*")
-        w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-        if r.Method == http.MethodOptions {
-            w.WriteHeader(http.StatusNoContent)
-            return
-        }
-        h.ServeHTTP(w, r)
-    })
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		h.ServeHTTP(w, r)
+	})
 }

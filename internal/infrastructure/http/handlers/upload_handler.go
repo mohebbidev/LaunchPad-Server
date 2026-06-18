@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"gowsrunner/internal/application"
+	"golaunch/internal/application"
 	"net/http"
 	"strings"
 )
@@ -46,7 +46,7 @@ func (handler *UploadHandler) ServeHTTP(
 
 	uploadResult, err := handler.UploadUseCase.Execute(ctx, application.UploadInput{
 		Filename: hdr.Filename,
-		File: file,
+		File:     file,
 	})
 
 	if err != nil {
@@ -57,5 +57,5 @@ func (handler *UploadHandler) ServeHTTP(
 	w.WriteHeader(http.StatusOK)
 
 	_ = json.NewEncoder(w).Encode(uploadResult)
-	
+
 }

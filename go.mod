@@ -1,4 +1,4 @@
-module gowsrunner
+module GoLaunch
 
 go 1.25.7
 

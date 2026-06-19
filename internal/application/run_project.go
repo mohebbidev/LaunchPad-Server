@@ -8,6 +8,7 @@ import (
 
 	"golaunch/internal/domain/entities"
 	"golaunch/internal/domain/repository"
+	"golaunch/internal/infrastructure/utils"
 	"golaunch/internal/queue"
 	"os"
 	"path/filepath"
@@ -35,6 +36,7 @@ type RunProjectUseCase struct {
 	ProjectRepo repository.ProjectRepository
 	Runner      *ProjectRunner
 	WP          *queue.WorkerPool
+	Registry    *LogRegistry
 }
 
 func NewRunProjectUseCase(repo repository.ProjectRepository, wp *queue.WorkerPool) *RunProjectUseCase {
@@ -60,45 +62,60 @@ func (uc *RunProjectUseCase) Execute(
 		return nil, fmt.Errorf("failed to update status: %w", err)
 	}
 
+	// logCh := make(chan LogLine, 64)
+
 	logCh := make(chan LogLine, 64)
+	uc.Registry.Register(projectID, logCh)
 
-	go func() {
-		defer close(logCh)
+	err = uc.WP.Submit(queue.Job{
+		ID:        utils.NewID(),
+		ProjectID: projectID,
+	})
 
-		send := func(stream, text string) {
-			select {
-			case logCh <- LogLine{Stream: stream, Text: text}:
-			case <-ctx.Done():
-			}
-		}
+	// queue full
+	if err != nil {
+		uc.Registry.Delete(projectID)
+		close(logCh)
+		return nil, fmt.Errorf("Runner is busy, try again shortly. %v ", err.Error())
+	}
 
-		path, err := ResolveProjectRoot(project.SourceLocation)
-		if err != nil {
-			send("stderr", fmt.Sprintf(
-				"[runner] failed to resolve project root: %v",
-				err,
-			))
+	// go func() {
+	// 	defer close(logCh)
 
-			_ = uc.ProjectRepo.UpdateStatus(
-				ctx,
-				projectID,
-				entities.StatusFailed,
-			)
+	// 	send := func(stream, text string) {
+	// 		select {
+	// 		case logCh <- LogLine{Stream: stream, Text: text}:
+	// 		case <-ctx.Done():
+	// 		}
+	// 	}
 
-			err = nil
-			return
-		}
+	// 	path, err := ResolveProjectRoot(project.SourceLocation)
+	// 	if err != nil {
+	// 		send("stderr", fmt.Sprintf(
+	// 			"[runner] failed to resolve project root: %v",
+	// 			err,
+	// 		))
 
-		err = uc.Runner.Run(ctx, path, port, send)
+	// 		_ = uc.ProjectRepo.UpdateStatus(
+	// 			ctx,
+	// 			projectID,
+	// 			entities.StatusFailed,
+	// 		)
 
-		if err != nil {
-			send("stderr", fmt.Sprintf("[runner] %v", err))
-			_ = uc.ProjectRepo.UpdateStatus(context.Background(), projectID, entities.StatusFailed)
-			return
-		}
+	// 		err = nil
+	// 		return
+	// 	}
 
-		_ = uc.ProjectRepo.UpdateStatus(context.Background(), projectID, entities.StatusStopped)
-	}()
+	// 	err = uc.Runner.Run(ctx, path, port, send)
+
+	// 	if err != nil {
+	// 		send("stderr", fmt.Sprintf("[runner] %v", err))
+	// 		_ = uc.ProjectRepo.UpdateStatus(context.Background(), projectID, entities.StatusFailed)
+	// 		return
+	// 	}
+
+	// 	_ = uc.ProjectRepo.UpdateStatus(context.Background(), projectID, entities.StatusStopped)
+	// }()
 
 	return logCh, nil
 }
@@ -131,4 +148,3 @@ func ResolveProjectRoot(extractPath string) (string, error) {
 	// files are at the root of the extract — use as-is
 	return extractPath, nil
 }
-

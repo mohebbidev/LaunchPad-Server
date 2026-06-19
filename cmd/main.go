@@ -100,8 +100,8 @@ func main() {
 	workerPool := queue.NewWorkerPool(15, processor)
 	workerPool.Start()
 	defer workerPool.ShutDown()
-	
-	packageHttp.InitializeRoutes(ctx, dbPool, workerPool, mux)
+
+	packageHttp.InitializeRoutes(ctx, dbPool, workerPool, registry, mux)
 	server := &nethttp.Server{
 		Addr:    ":" + configuration.Server.Port,
 		Handler: mux,

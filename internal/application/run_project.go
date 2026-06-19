@@ -44,6 +44,7 @@ func NewRunProjectUseCase(repo repository.ProjectRepository, wp *queue.WorkerPoo
 		ProjectRepo: repo,
 		Runner:      NewProjectRunner(),
 		Registry:    registry,
+		WP: wp,
 	}
 }
 

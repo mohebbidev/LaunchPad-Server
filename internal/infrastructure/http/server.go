@@ -21,15 +21,15 @@ func InitializeUploadHandler(db *pgxpool.Pool) *handler.UploadHandler {
 	return handler.NewUplaodHandler(useCase)
 }
 
-func InitializeRunProjectHandler(db *pgxpool.Pool, wp *queue.WorkerPool) *handler.RunHandler {
+func InitializeRunProjectHandler(db *pgxpool.Pool, wp *queue.WorkerPool, registry *application.LogRegistry) *handler.RunHandler {
 	dbRepo := postgres.NewProjectRepository(db) // same repo, fresh instance
-	useCase := application.NewRunProjectUseCase(dbRepo, wp)
+	useCase := application.NewRunProjectUseCase(dbRepo, wp, registry)
 	return handler.NewRunHandler(useCase)
 }
 
-func InitializeRoutes(ctx context.Context, db *pgxpool.Pool, wp *queue.WorkerPool, mux *http.ServeMux) {
+func InitializeRoutes(ctx context.Context, db *pgxpool.Pool, wp *queue.WorkerPool, registry *application.LogRegistry, mux *http.ServeMux) {
 	uploadHandler := InitializeUploadHandler(db)
-	runHandler := InitializeRunProjectHandler(db, wp)
+	runHandler := InitializeRunProjectHandler(db, wp, registry)
 
 	mux.Handle("/upload", withCORS(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		uploadHandler.ServeHTTP(ctx, w, r)

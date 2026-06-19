@@ -39,8 +39,12 @@ type RunProjectUseCase struct {
 	Registry    *LogRegistry
 }
 
-func NewRunProjectUseCase(repo repository.ProjectRepository, wp *queue.WorkerPool) *RunProjectUseCase {
-	return &RunProjectUseCase{ProjectRepo: repo, Runner: NewProjectRunner()}
+func NewRunProjectUseCase(repo repository.ProjectRepository, wp *queue.WorkerPool, registry *LogRegistry) *RunProjectUseCase {
+	return &RunProjectUseCase{
+		ProjectRepo: repo,
+		Runner:      NewProjectRunner(),
+		Registry:    registry,
+	}
 }
 
 func (uc *RunProjectUseCase) Execute(

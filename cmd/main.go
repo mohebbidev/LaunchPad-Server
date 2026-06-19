@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"golaunch/internal/application"
+	"golaunch/internal/domain/entities"
 	"golaunch/internal/infrastructure/config"
 	"golaunch/internal/infrastructure/database/postgres"
 	packageHttp "golaunch/internal/infrastructure/http"
@@ -12,8 +14,6 @@ import (
 	"os"
 	"os/exec"
 	"sync"
-
-	"github.com/docker/docker/libcontainerd/queue"
 )
 
 var (
@@ -56,10 +56,53 @@ func main() {
 
 	mux := nethttp.NewServeMux()
 
-	packageHttp.InitializeRoutes(ctx, dbPool, mux)
-
+	registry := application.NewLogRegistry()
 	projRunner := application.NewProjectRunner()
-	workerPool := queue.NewWorkerPool(15, projRunner.Run)
+	dbRepo := postgres.NewProjectRepository(dbPool)
+
+	processor := func(ctx context.Context, job queue.Job) error {
+		logCh, ok := registry.Get(job.ProjectID)
+		if !ok {
+			return fmt.Errorf("no log channel found for project %s", job.ProjectID)
+		}
+
+		defer registry.Delete(job.ProjectID)
+		defer close(logCh)
+
+		send := func(stream, text string) {
+			select {
+			case logCh <- application.LogLine{Stream: stream, Text: text}:
+			case <-ctx.Done():
+			}
+		}
+
+		project, err := dbRepo.GetByID(ctx, job.ProjectID)
+		if err != nil {
+			return fmt.Errorf("project lookup failed: %w", err)
+		}
+
+		path, err := application.ResolveProjectRoot(project.SourceLocation)
+		if err != nil {
+			send("stderr", fmt.Sprintf("[runner] failed to resolve project root: %v", err))
+			_ = dbRepo.UpdateStatus(context.Background(), job.ProjectID, entities.StatusFailed)
+			return err
+		}
+
+		if err := projRunner.Run(ctx, path, project.Port, send); err != nil {
+			send("stderr", fmt.Sprintf("[runner] %v", err))
+			_ = dbRepo.UpdateStatus(context.Background(), job.ProjectID, entities.StatusFailed)
+			return err
+		}
+
+		_ = dbRepo.UpdateStatus(context.Background(), job.ProjectID, entities.StatusStopped)
+		return nil
+	}
+
+	workerPool := queue.NewWorkerPool(15, processor)
+	workerPool.Start()
+	defer workerPool.ShutDown()
+	
+	packageHttp.InitializeRoutes(ctx, dbPool, workerPool, mux)
 	server := &nethttp.Server{
 		Addr:    ":" + configuration.Server.Port,
 		Handler: mux,

@@ -23,7 +23,7 @@ func InitializeUploadHandler(db *pgxpool.Pool) *handler.UploadHandler {
 
 func InitializeRunProjectHandler(db *pgxpool.Pool, wp *queue.WorkerPool) *handler.RunHandler {
 	dbRepo := postgres.NewProjectRepository(db) // same repo, fresh instance
-	useCase := application.NewRunProjectUseCase(dbRepo)
+	useCase := application.NewRunProjectUseCase(dbRepo, wp)
 	return handler.NewRunHandler(useCase)
 }
 

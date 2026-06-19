@@ -46,7 +46,7 @@ func main() {
 		log.Fatalf("cant connect db %v", err.Error())
 	}
 
-	postgres.RunMigrations(ctx, dbPool, "file:///home/nooberthanyall/Documents/projects/golaunch/migrations")
+	postgres.RunMigrations(ctx, dbPool, "file://migrations")
 	defer func() {
 		if dbPool != nil {
 			log.Println("Closing database connection pool...")

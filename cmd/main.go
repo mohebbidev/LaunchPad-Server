@@ -52,8 +52,7 @@ func main() {
 			log.Println("Closing database connection pool...")
 			dbPool.Close()
 		}
-	}()
-
+	}() 
 	mux := nethttp.NewServeMux()
 
 	registry := application.NewLogRegistry()

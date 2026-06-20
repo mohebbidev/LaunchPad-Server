@@ -84,44 +84,6 @@ func (uc *RunProjectUseCase) Execute(
 		return nil, fmt.Errorf("Runner is busy, try again shortly. %v ", err.Error())
 	}
 
-	// go func() {
-	// 	defer close(logCh)
-
-	// 	send := func(stream, text string) {
-	// 		select {
-	// 		case logCh <- LogLine{Stream: stream, Text: text}:
-	// 		case <-ctx.Done():
-	// 		}
-	// 	}
-
-	// 	path, err := ResolveProjectRoot(project.SourceLocation)
-	// 	if err != nil {
-	// 		send("stderr", fmt.Sprintf(
-	// 			"[runner] failed to resolve project root: %v",
-	// 			err,
-	// 		))
-
-	// 		_ = uc.ProjectRepo.UpdateStatus(
-	// 			ctx,
-	// 			projectID,
-	// 			entities.StatusFailed,
-	// 		)
-
-	// 		err = nil
-	// 		return
-	// 	}
-
-	// 	err = uc.Runner.Run(ctx, path, port, send)
-
-	// 	if err != nil {
-	// 		send("stderr", fmt.Sprintf("[runner] %v", err))
-	// 		_ = uc.ProjectRepo.UpdateStatus(context.Background(), projectID, entities.StatusFailed)
-	// 		return
-	// 	}
-
-	// 	_ = uc.ProjectRepo.UpdateStatus(context.Background(), projectID, entities.StatusStopped)
-	// }()
-
 	return logCh, nil
 }
 

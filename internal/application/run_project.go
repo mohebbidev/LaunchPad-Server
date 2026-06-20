@@ -67,7 +67,7 @@ func (uc *RunProjectUseCase) Execute(
 		return nil, fmt.Errorf("failed to update status: %w", err)
 	}
 
-	// logCh := make(chan LogLine, 64)
+	// logCh := make(chan LogLine, 64) 
 
 	logCh := make(chan LogLine, 64)
 	uc.Registry.Register(projectID, logCh)
